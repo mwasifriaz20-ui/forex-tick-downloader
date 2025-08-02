@@ -1,4 +1,4 @@
-dukascopy-python
+git+https://github.com/Eghosa-Osayande/dukascopy.git
 pandas
 tqdm
 google-api-python-client
