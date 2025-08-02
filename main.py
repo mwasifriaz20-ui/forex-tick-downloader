@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 import pandas as pd
-from dukascopy_python.client import DukascopyClient
+from dukascopy import DukascopyClient
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -24,12 +24,14 @@ creds = service_account.Credentials.from_service_account_file(
 drive_service = build('drive', 'v3', credentials=creds)
 
 def upload_to_drive(file_path, file_name):
+    """Uploads a file to Google Drive."""
     file_metadata = {'name': file_name, 'parents': [FOLDER_ID]}
     media = MediaFileUpload(file_path, mimetype='text/csv')
     drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
     print(f"✅ Uploaded {file_name} to Google Drive")
 
 def download_pair(pair):
+    """Downloads data in monthly chunks and uploads to Drive."""
     print(f"\n📥 Starting download for {pair}...")
     client = DukascopyClient()
 
@@ -43,16 +45,16 @@ def download_pair(pair):
 
         print(f"⏳ Downloading {pair} from {current_start.date()} to {current_end.date()}...")
         try:
-            data = client.get_data(
+            df = client.get_data(
                 instrument=pair,
                 start=current_start,
                 end=current_end,
                 timeframe='tick'
             )
-            if not data.empty:
-                all_data.append(data)
+            if not df.empty:
+                all_data.append(df)
         except Exception as e:
-            print(f"⚠️ Error downloading {pair} {current_start} - {current_end}: {e}")
+            print(f"⚠️ Error: {e}")
 
         current_start = current_end
 
